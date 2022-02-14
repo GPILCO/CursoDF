@@ -1,0 +1,24 @@
+{
+	"name": "parquet_ParquetEjemploClase02",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_kfcDataLake",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Clase02"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "EjemploClase02.parquet",
+				"folderPath": "Clase02",
+				"fileSystem": "aci-gustavo-pilco"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
