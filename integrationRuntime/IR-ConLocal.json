@@ -1,0 +1,7 @@
+{
+	"name": "IR-ConLocal",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Acceder a los recursos de la maquina local"
+	}
+}
