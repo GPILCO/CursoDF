@@ -1,26 +1,6 @@
 {
 	"name": "PL_EJEMPLO_CLASE01",
 	"properties": {
-		"activities": [
-			{
-				"name": "Set variable1",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"userProperties": []
-			},
-			{
-				"name": "Set variable2",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"userProperties": []
-			},
-			{
-				"name": "Set variable3",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"userProperties": []
-			}
-		],
 		"folder": {
 			"name": "Clase01"
 		},
