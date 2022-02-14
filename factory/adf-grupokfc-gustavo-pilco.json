@@ -1,0 +1,9 @@
+{
+	"name": "adf-grupokfc-gustavo-pilco",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ee37914f-2d83-405c-af70-9e26c333d758",
+		"tenantId": "879312d9-8eca-4bfd-ba34-3c258c30c645"
+	}
+}
