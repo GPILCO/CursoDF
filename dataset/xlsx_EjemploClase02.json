@@ -1,0 +1,23 @@
+{
+	"name": "xlsx_EjemploClase02",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_FileSystemLOcal",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Clase02"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Hoja1",
+			"location": {
+				"type": "FileServerLocation",
+				"fileName": "EjemploClase02.xlsx"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	}
+}
