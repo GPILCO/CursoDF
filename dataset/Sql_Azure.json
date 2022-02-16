@@ -1,0 +1,15 @@
+{
+	"name": "Sql_Azure",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSqlDataBase",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Clase03"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
