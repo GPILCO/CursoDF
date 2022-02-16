@@ -20,7 +20,15 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "FileServerLocation"
+				"type": "FileServerLocation",
+				"fileName": {
+					"value": "@dataset().NombreArchivo",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().Directorio",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ";",
 			"escapeChar": "\\",
