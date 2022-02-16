@@ -1,0 +1,17 @@
+{
+	"name": "ls_SqlServerLocal",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=True;data source=LBEGPILCO\\GPILCO;initial catalog=KFCCurso",
+			"userName": "kfc\\gustavo.pilco",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI2MDYyNmRjMi02MWRkLTQ4NGYtYjkwZi00ZDI3NGU0ZTY2NjYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-ConLocal",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
