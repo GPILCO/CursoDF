@@ -5,6 +5,14 @@
 			"referenceName": "ls_FileSystemLOcal",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Directorio": {
+				"type": "string"
+			},
+			"NombreArchivo": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "Clase03"
 		},
