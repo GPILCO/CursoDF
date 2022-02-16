@@ -20,7 +20,16 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation"
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().NombreArchivo",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().Directorio",
+					"type": "Expression"
+				},
+				"fileSystem": "aci-gustavo-pilco"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
