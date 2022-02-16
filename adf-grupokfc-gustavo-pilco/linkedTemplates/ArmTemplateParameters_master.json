@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-grupokfc-gustavo-pilco"
+		},
+		"ls_FileSystemLOcal_password": {
+			"value": ""
+		},
+		"ls_kfcDataLake_accountKey": {
+			"value": ""
+		},
+		"ls_FileSystemLOcal_properties_typeProperties_host": {
+			"value": "C:\\Users\\gustavo.pilco\\DataFactory"
+		},
+		"ls_FileSystemLOcal_properties_typeProperties_userId": {
+			"value": "kfc\\gustavo.pilco"
+		},
+		"ls_kfcDataLake_properties_typeProperties_url": {
+			"value": "https://dlsgrupokfcadf.dfs.core.windows.net"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
