@@ -4,24 +4,24 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Nombre de instancia de Data Factory",
+			"metadata": "Data Factory name",
 			"defaultValue": "adf-grupokfc-gustavo-pilco"
 		},
 		"ls_kfcDataLake_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"ls_kfcDataLake\""
+			"metadata": "Secure string for 'accountKey' of 'ls_kfcDataLake'"
 		},
 		"ls_FileSystemLOcal_password": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"password\"de \"ls_FileSystemLOcal\""
+			"metadata": "Secure string for 'password' of 'ls_FileSystemLOcal'"
 		},
 		"ls_SqlServerLocal_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"ls_SqlServerLocal\""
+			"metadata": "Secure string for 'connectionString' of 'ls_SqlServerLocal'"
 		},
 		"ls_SqlServerLocal_password": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"password\"de \"ls_SqlServerLocal\""
+			"metadata": "Secure string for 'password' of 'ls_SqlServerLocal'"
 		},
 		"ls_Keyvault_kfc_properties_typeProperties_baseUrl": {
 			"type": "string",
