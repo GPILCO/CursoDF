@@ -11,15 +11,35 @@
 			"type": "secureString",
 			"metadata": "Cadena protegida para \"password\"de \"ls_FileSystemLOcal\""
 		},
+		"ls_SqlServerLocal_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"ls_SqlServerLocal\""
+		},
+		"ls_SqlServerLocal_password": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"password\"de \"ls_SqlServerLocal\""
+		},
 		"ls_kfcDataLake_accountKey": {
 			"type": "secureString",
 			"metadata": "Cadena protegida para \"accountKey\"de \"ls_kfcDataLake\""
+		},
+		"ls_AzureSqlDataBase_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "connection-string"
 		},
 		"ls_FileSystemLOcal_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "C:\\Users\\gustavo.pilco\\DataFactory"
 		},
 		"ls_FileSystemLOcal_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "kfc\\gustavo.pilco"
+		},
+		"ls_Keyvault_kfc_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-grupokfc-adf.vault.azure.net/"
+		},
+		"ls_SqlServerLocal_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "kfc\\gustavo.pilco"
 		},
@@ -60,14 +80,29 @@
 					"ls_FileSystemLOcal_password": {
 						"value": "[parameters('ls_FileSystemLOcal_password')]"
 					},
+					"ls_SqlServerLocal_connectionString": {
+						"value": "[parameters('ls_SqlServerLocal_connectionString')]"
+					},
+					"ls_SqlServerLocal_password": {
+						"value": "[parameters('ls_SqlServerLocal_password')]"
+					},
+					"ls_Keyvault_kfc_properties_typeProperties_baseUrl": {
+						"value": "[parameters('ls_Keyvault_kfc_properties_typeProperties_baseUrl')]"
+					},
 					"ls_kfcDataLake_properties_typeProperties_url": {
 						"value": "[parameters('ls_kfcDataLake_properties_typeProperties_url')]"
+					},
+					"ls_AzureSqlDataBase_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('ls_AzureSqlDataBase_properties_typeProperties_connectionString_secretName')]"
 					},
 					"ls_FileSystemLOcal_properties_typeProperties_host": {
 						"value": "[parameters('ls_FileSystemLOcal_properties_typeProperties_host')]"
 					},
 					"ls_FileSystemLOcal_properties_typeProperties_userId": {
 						"value": "[parameters('ls_FileSystemLOcal_properties_typeProperties_userId')]"
+					},
+					"ls_SqlServerLocal_properties_typeProperties_userName": {
+						"value": "[parameters('ls_SqlServerLocal_properties_typeProperties_userName')]"
 					}
 				}
 			},

@@ -8,13 +8,28 @@
 		"ls_FileSystemLOcal_password": {
 			"value": ""
 		},
+		"ls_SqlServerLocal_connectionString": {
+			"value": ""
+		},
+		"ls_SqlServerLocal_password": {
+			"value": ""
+		},
 		"ls_kfcDataLake_accountKey": {
 			"value": ""
+		},
+		"ls_AzureSqlDataBase_properties_typeProperties_connectionString_secretName": {
+			"value": "connection-string"
 		},
 		"ls_FileSystemLOcal_properties_typeProperties_host": {
 			"value": "C:\\Users\\gustavo.pilco\\DataFactory"
 		},
 		"ls_FileSystemLOcal_properties_typeProperties_userId": {
+			"value": "kfc\\gustavo.pilco"
+		},
+		"ls_Keyvault_kfc_properties_typeProperties_baseUrl": {
+			"value": "https://kv-grupokfc-adf.vault.azure.net/"
+		},
+		"ls_SqlServerLocal_properties_typeProperties_userName": {
 			"value": "kfc\\gustavo.pilco"
 		},
 		"ls_kfcDataLake_properties_typeProperties_url": {

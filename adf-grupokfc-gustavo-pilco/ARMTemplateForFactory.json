@@ -11,15 +11,35 @@
 			"type": "secureString",
 			"metadata": "Cadena protegida para \"password\"de \"ls_FileSystemLOcal\""
 		},
+		"ls_SqlServerLocal_connectionString": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"connectionString\"de \"ls_SqlServerLocal\""
+		},
+		"ls_SqlServerLocal_password": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"password\"de \"ls_SqlServerLocal\""
+		},
 		"ls_kfcDataLake_accountKey": {
 			"type": "secureString",
 			"metadata": "Cadena protegida para \"accountKey\"de \"ls_kfcDataLake\""
+		},
+		"ls_AzureSqlDataBase_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "connection-string"
 		},
 		"ls_FileSystemLOcal_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "C:\\Users\\gustavo.pilco\\DataFactory"
 		},
 		"ls_FileSystemLOcal_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "kfc\\gustavo.pilco"
+		},
+		"ls_Keyvault_kfc_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-grupokfc-adf.vault.azure.net/"
+		},
+		"ls_SqlServerLocal_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "kfc\\gustavo.pilco"
 		},
@@ -32,6 +52,85 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_CargaIncremental')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copia incremental",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT [idFactura]\n      ,[idCliente]\n      ,[idEmpleado]\n      ,[fechaFactura]\n      ,[subtotal]\n      ,[impuestos]\n  FROM [dbo].[Factura]\n  WHERE YEAR([fechaFactura])=2017 AND MONTH([fechaFactura])=1",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "TB_leer",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_Escribir",
+								"type": "DatasetReference",
+								"parameters": {
+									"Directorio": "Factura/2017/1",
+									"NombreArchivo": "factura.csv"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TB_leer')]",
+				"[concat(variables('factoryId'), '/datasets/csv_Escribir')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pl_CopiaExcelLocal')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -187,6 +286,271 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_copia_datos_Nube')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Sql_ServerLocal",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Sql_Azure",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Sql_ServerLocal')]",
+				"[concat(variables('factoryId'), '/datasets/Sql_Azure')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_copia_datos_Nube_Mapeo')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data nube con mapeo",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "select Codigo, Nombre, Nota NotaFinal\nfrom [dbo].[Tabla1]",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "delete from dbo.CatagoloGustavoPilco",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Codigo",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "Codigo",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "Nombre",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Nombre",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "NotaFinal",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Nota",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Sql_ServerLocal",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Sql_Azure",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Sql_ServerLocal')]",
+				"[concat(variables('factoryId'), '/datasets/Sql_Azure')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sql_Azure')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDataBase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "CatagoloGustavoPilco"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDataBase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sql_ServerLocal')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_SqlServerLocal",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "Codigo",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Nombre",
+						"type": "varchar"
+					},
+					{
+						"name": "Nota",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Tabla1"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_SqlServerLocal')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TB_leer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDataBase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDataBase')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/csv_EjemploClase02Nube')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -207,6 +571,52 @@
 						"fileSystem": "aci-gustavo-pilco"
 					},
 					"columnDelimiter": ";",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kfcDataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/csv_Escribir')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_kfcDataLake",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Directorio": {
+						"type": "string"
+					},
+					"NombreArchivo": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Clase03"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().NombreArchivo",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Directorio",
+							"type": "Expression"
+						},
+						"fileSystem": "aci-gustavo-pilco"
+					},
+					"columnDelimiter": ",",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
@@ -275,6 +685,28 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ls_AzureSqlDataBase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_Keyvault_kfc",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('ls_AzureSqlDataBase_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_Keyvault_kfc')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ls_FileSystemLOcal')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -287,6 +719,43 @@
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('ls_FileSystemLOcal_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-ConLocal",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/IR-ConLocal')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_Keyvault_kfc')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('ls_Keyvault_kfc_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_SqlServerLocal')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_SqlServerLocal_connectionString')]",
+					"userName": "[parameters('ls_SqlServerLocal_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ls_SqlServerLocal_password')]"
 					}
 				},
 				"connectVia": {
