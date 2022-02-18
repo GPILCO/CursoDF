@@ -1,6 +1,26 @@
 {
 	"name": "pl_ejemploFlujo",
 	"properties": {
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Bandera",
+					"value": {
+						"value": "@add(1,6)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"Bandera": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "Clase04"
 		},
