@@ -14,10 +14,47 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Correcta",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Resultado",
+					"value": "ok"
+				}
+			},
+			{
+				"name": "Fallida",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Resultado",
+					"value": "error"
+				}
 			}
 		],
 		"variables": {
 			"Bandera": {
+				"type": "String"
+			},
+			"Resultado": {
 				"type": "String"
 			}
 		},
