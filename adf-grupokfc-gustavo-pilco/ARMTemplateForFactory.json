@@ -286,6 +286,440 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_FechaporDefecto')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set FechaCorte",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FechaCortevar",
+							"value": {
+								"value": "@coalesce(pipeline().parameters.FechaCorte,formatDateTime(utcnow(),'yyyy-MM-dd'))",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"FechaCorte": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"FechaCortevar": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_TallerDF')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ConsultaDatos",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select esquema,\ttabla,\tconsulta,\ttipoTabla\nfrom par.CatIngesta",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Azure_LeerDatos",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Recorrido",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "ConsultaDatos",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('ConsultaDatos').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().TipoTabla,'stock')",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "History",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "@replace(item().Consulta,'{{fechaCorte}}',pipeline().parameters.FechaCorte)",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "Azure_LeerDatos",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "csv_Escribir",
+														"type": "DatasetReference",
+														"parameters": {
+															"Directorio": {
+																"value": "@concat('Taller/',item().Esquema,'/',item().Tabla)",
+																"type": "Expression"
+															},
+															"NombreArchivo": {
+																"value": "@concat(item().Tabla,'_',pipeline().parameters.FechaCorte,'.csv')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Stock",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "@item().Consulta",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobFSWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "TB_leer",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "csv_Escribir",
+														"type": "DatasetReference",
+														"parameters": {
+															"Directorio": {
+																"value": "@concat('Taller/',item().Esquema,'/',item().Tabla)",
+																"type": "Expression"
+															},
+															"NombreArchivo": {
+																"value": "@concat(item().Tabla,'csv')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"FechaCorte": {
+						"type": "string",
+						"defaultValue": "2020-03-01"
+					}
+				},
+				"folder": {
+					"name": "Taller"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Azure_LeerDatos')]",
+				"[concat(variables('factoryId'), '/datasets/csv_Escribir')]",
+				"[concat(variables('factoryId'), '/datasets/TB_leer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_UsoCondicional')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(mod(pipeline().parameters.Numero,2),0)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set variable2",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Resultado",
+										"value": {
+											"value": "El Numero @{pipeline().parameters.Numero} es impar",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set variable1",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Resultado",
+										"value": {
+											"value": "El Numero @{pipeline().parameters.Numero} es par",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Numero": {
+						"type": "int",
+						"defaultValue": 0
+					}
+				},
+				"variables": {
+					"Resultado": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_UsoFormulas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ParImpar",
+						"description": "Par O Impar",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "Resultado",
+							"value": {
+								"value": "@if(equals(mod(pipeline().parameters.Numero,2),0),'Es Par','Es Impar')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Numero": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"Resultado": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_consumorest')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Consultar Hora Universal",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "http://worldclockapi.com/api/json/utc/now",
+							"method": "GET",
+							"headers": {}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Consultar Hora Universal",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "DayOfWeek",
+							"value": {
+								"value": "@activity('Consultar Hora Universal').output.dayOfTheWeek",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"DayOfWeek": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pl_copia_datos_Nube')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -468,6 +902,134 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_ejecutar_sp1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Stored procedure1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[Saludar]",
+							"storedProcedureParameters": {
+								"nombre": {
+									"value": "Data Factory",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_AzureSqlDataBase",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDataBase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_ejecutar_sp2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[dbo].[Saludar]",
+								"storedProcedureParameters": {
+									"nombre": {
+										"type": "String",
+										"value": "Data Factory 2"
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "TB_leer",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "csv_ResultadoSP",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/TB_leer')]",
+				"[concat(variables('factoryId'), '/datasets/csv_ResultadoSP')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pl_ejemploFlujo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -621,6 +1183,272 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_manejofechas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set FechaActual",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FechaActual",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set FechaFormatoPersonalizado",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set FechaActual",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FechaFormatoPersonalizado",
+							"value": {
+								"value": "@formatDateTime(variables('FechaActual'),'yyyy-mm-dd')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set FechaInicioMes",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set FechaFormatoPersonalizado",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FechaInicioMes",
+							"value": {
+								"value": "@startOfMonth(variables('FechaActual'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set FechaSumaPeriodo",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set FechaInicioMes",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "FechaSumaPeriodo",
+							"value": {
+								"value": "@addToTime(variables('FechaInicioMes'),1,'month')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"FechaActual": {
+						"type": "String"
+					},
+					"FechaInicioMes": {
+						"type": "String"
+					},
+					"FechaFormatoPersonalizado": {
+						"type": "String"
+					},
+					"FechaSumaPeriodo": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_usoSwitch')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Switch1",
+						"type": "Switch",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"on": {
+								"value": "@pipeline().parameters.Bandera",
+								"type": "Expression"
+							},
+							"cases": [
+								{
+									"value": "A",
+									"activities": [
+										{
+											"name": "Set variable1",
+											"type": "SetVariable",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"variableName": "Mensaje",
+												"value": {
+													"value": "@string(add(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "B",
+									"activities": [
+										{
+											"name": "Set variable2",
+											"type": "SetVariable",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"variableName": "Mensaje",
+												"value": {
+													"value": "@string(div(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"value": "C",
+									"activities": [
+										{
+											"name": "Set variable3",
+											"type": "SetVariable",
+											"dependsOn": [],
+											"userProperties": [],
+											"typeProperties": {
+												"variableName": "Mensaje",
+												"value": {
+													"value": "@string(mul(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							],
+							"defaultActivities": [
+								{
+									"name": "Set variable4",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Mensaje",
+										"value": "Default"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Bandera": {
+						"type": "string"
+					},
+					"Numero1": {
+						"type": "float",
+						"defaultValue": 20
+					},
+					"Numero2": {
+						"type": "float",
+						"defaultValue": 10
+					}
+				},
+				"variables": {
+					"Mensaje": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure_LeerDatos')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDataBase",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Taller"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "idIngesta",
+						"type": "varchar"
+					},
+					{
+						"name": "esquema",
+						"type": "varchar"
+					},
+					{
+						"name": "tabla",
+						"type": "varchar"
+					},
+					{
+						"name": "consulta",
+						"type": "varchar"
+					},
+					{
+						"name": "tipoTabla",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "par",
+					"table": "CatIngesta"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDataBase')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Sql_Azure')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -719,9 +1547,7 @@
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "EjemploClase02Nube.csv",
-						"fileSystem": "aci-gustavo-pilco"
+						"type": "AzureBlobFSLocation"
 					},
 					"columnDelimiter": ";",
 					"escapeChar": "\\",
@@ -767,6 +1593,38 @@
 							"value": "@dataset().Directorio",
 							"type": "Expression"
 						},
+						"fileSystem": "aci-gustavo-pilco"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kfcDataLake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/csv_ResultadoSP')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_kfcDataLake",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Clase Asincrona"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "saludol.csv",
+						"folderPath": "RESULTADOS",
 						"fileSystem": "aci-gustavo-pilco"
 					},
 					"columnDelimiter": ",",
@@ -990,597 +1848,43 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pl_ejecutar_sp1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/sc_Taller')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
-					{
-						"name": "Stored procedure1",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[Saludar]",
-							"storedProcedureParameters": {
-								"nombre": {
-									"value": "Data Factory",
-									"type": "String"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_AzureSqlDataBase",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDataBase')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_ejecutar_sp2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderStoredProcedureName": "[[dbo].[Saludar]",
-								"storedProcedureParameters": {
-									"nombre": {
-										"type": "String",
-										"value": "Data Factory 2"
-									}
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "TB_leer",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "csv_ResultadoSP",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/TB_leer')]",
-				"[concat(variables('factoryId'), '/datasets/csv_ResultadoSP')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/csv_ResultadoSP')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_kfcDataLake",
-					"type": "LinkedServiceReference"
-				},
+				"description": "Carga del taller",
 				"annotations": [],
-				"type": "DelimitedText",
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "pl_TallerDF",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "saludol.csv",
-						"folderPath": "RESULTADOS",
-						"fileSystem": "aci-gustavo-pilco"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-02-21T22:52:00",
+						"timeZone": "SA Pacific Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_kfcDataLake')]"
+				"[concat(variables('factoryId'), '/pipelines/pl_TallerDF')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_UsoFormulas')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ParImpar",
-						"description": "Par O Impar",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "Resultado",
-							"value": {
-								"value": "@if(equals(mod(pipeline().parameters.Numero,2),0),'Es Par','Es Impar')",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Numero": {
-						"type": "int"
-					}
-				},
-				"variables": {
-					"Resultado": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_manejofechas')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Set FechaActual",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "FechaActual",
-							"value": {
-								"value": "@utcnow()",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Set FechaFormatoPersonalizado",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Set FechaActual",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "FechaFormatoPersonalizado",
-							"value": {
-								"value": "@formatDateTime(variables('FechaActual'),'yyyy-mm-dd')",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Set FechaInicioMes",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Set FechaFormatoPersonalizado",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "FechaInicioMes",
-							"value": {
-								"value": "@startOfMonth(variables('FechaActual'))",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Set FechaSumaPeriodo",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Set FechaInicioMes",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "FechaSumaPeriodo",
-							"value": {
-								"value": "@addToTime(variables('FechaInicioMes'),1,'month')",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"variables": {
-					"FechaActual": {
-						"type": "String"
-					},
-					"FechaInicioMes": {
-						"type": "String"
-					},
-					"FechaFormatoPersonalizado": {
-						"type": "String"
-					},
-					"FechaSumaPeriodo": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_FechaporDefecto')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Set FechaCorte",
-						"type": "SetVariable",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "FechaCortevar",
-							"value": {
-								"value": "@coalesce(pipeline().parameters.FechaCorte,formatDateTime(utcnow(),'yyyy-MM-dd'))",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"FechaCorte": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"FechaCortevar": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_UsoCondicional')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "If Condition1",
-						"type": "IfCondition",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(mod(pipeline().parameters.Numero,2),0)",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Set variable2",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "Resultado",
-										"value": {
-											"value": "El Numero @{pipeline().parameters.Numero} es impar",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Set variable1",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "Resultado",
-										"value": {
-											"value": "El Numero @{pipeline().parameters.Numero} es par",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Numero": {
-						"type": "int",
-						"defaultValue": 0
-					}
-				},
-				"variables": {
-					"Resultado": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_usoSwitch')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Switch1",
-						"type": "Switch",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"on": {
-								"value": "@pipeline().parameters.Bandera",
-								"type": "Expression"
-							},
-							"cases": [
-								{
-									"value": "A",
-									"activities": [
-										{
-											"name": "Set variable1",
-											"type": "SetVariable",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"variableName": "Mensaje",
-												"value": {
-													"value": "@string(add(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "B",
-									"activities": [
-										{
-											"name": "Set variable2",
-											"type": "SetVariable",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"variableName": "Mensaje",
-												"value": {
-													"value": "@string(div(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								},
-								{
-									"value": "C",
-									"activities": [
-										{
-											"name": "Set variable3",
-											"type": "SetVariable",
-											"dependsOn": [],
-											"userProperties": [],
-											"typeProperties": {
-												"variableName": "Mensaje",
-												"value": {
-													"value": "@string(mul(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								}
-							],
-							"defaultActivities": [
-								{
-									"name": "Set variable4",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "Mensaje",
-										"value": "Default"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"parameters": {
-					"Bandera": {
-						"type": "string"
-					},
-					"Numero1": {
-						"type": "float",
-						"defaultValue": 20
-					},
-					"Numero2": {
-						"type": "float",
-						"defaultValue": 10
-					}
-				},
-				"variables": {
-					"Mensaje": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_consumorest')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Consultar Hora Universal",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"url": "http://worldclockapi.com/api/json/utc/now",
-							"method": "GET",
-							"headers": {}
-						}
-					},
-					{
-						"name": "Set variable1",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Consultar Hora Universal",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "DayOfWeek",
-							"value": {
-								"value": "@activity('Consultar Hora Universal').output.dayOfTheWeek",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"variables": {
-					"DayOfWeek": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Clase Asincrona"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
 		}
 	]
 }
