@@ -12,9 +12,7 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation",
-				"fileName": "EjemploClase02Nube.csv",
-				"fileSystem": "aci-gustavo-pilco"
+				"type": "AzureBlobFSLocation"
 			},
 			"columnDelimiter": ";",
 			"escapeChar": "\\",
