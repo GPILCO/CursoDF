@@ -74,7 +74,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@activity('ConsultaDatos').output.Consulta",
+													"value": "@replace(item().Consulta,'{{fechaCorte}}',pipeline().parameters.FechaCorte)",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
@@ -191,6 +191,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"FechaCorte": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "Taller"
 		},
