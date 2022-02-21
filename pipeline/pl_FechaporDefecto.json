@@ -3,10 +3,17 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Set variable1",
+				"name": "Set FechaCorte",
 				"type": "SetVariable",
 				"dependsOn": [],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FechaCortevar",
+					"value": {
+						"value": "@coalesce(pipeline().parameters.FechaCorte,formatDateTime(utcnow(),'yyyy-mm-dd'))",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
