@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Consulta",
+				"name": "ConsultaDatos",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -33,7 +33,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Consulta",
+						"activity": "ConsultaDatos",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Consulta').output",
+						"value": "@activity('ConsultaDatos').output",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -107,7 +107,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@activity('Consulta').output.Consulta",
+													"value": "@activity('ConsultaDatos').output.Consulta",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
