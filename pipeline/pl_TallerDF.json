@@ -71,8 +71,23 @@
 										},
 										"userProperties": [],
 										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "@activity('Consulta').output.Consulta",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
 											"enableStaging": false
-										}
+										},
+										"inputs": [
+											{
+												"referenceName": "Azure_LeerDatos",
+												"type": "DatasetReference"
+											}
+										]
 									}
 								],
 								"ifTrueActivities": [
@@ -92,7 +107,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@activity('Consulta').output",
+													"value": "@activity('Consulta').output.Consulta",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
