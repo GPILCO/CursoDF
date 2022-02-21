@@ -5,6 +5,9 @@
 			"referenceName": "ls_kfcDataLake",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "Clase Asincrona"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {

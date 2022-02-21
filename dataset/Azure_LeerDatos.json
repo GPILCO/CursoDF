@@ -1,0 +1,40 @@
+{
+	"name": "Azure_LeerDatos",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSqlDataBase",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Taller"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "idIngesta",
+				"type": "varchar"
+			},
+			{
+				"name": "esquema",
+				"type": "varchar"
+			},
+			{
+				"name": "tabla",
+				"type": "varchar"
+			},
+			{
+				"name": "consulta",
+				"type": "varchar"
+			},
+			{
+				"name": "tipoTabla",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "par",
+			"table": "CatIngesta"
+		}
+	}
+}
