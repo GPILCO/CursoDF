@@ -1,0 +1,51 @@
+{
+	"name": "pl_manejofechas",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set FechaActual",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FechaActual",
+					"value": {
+						"value": "@utcnow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set FechaFormatoPersonalizado",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FechaFormatoPersonalizado",
+					"value": {
+						"value": "@formatDateTime(variables('FechaActual'),'yyyy-mm-dd')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"FechaActual": {
+				"type": "String"
+			},
+			"FechaInicioMes": {
+				"type": "String"
+			},
+			"FechaFormatoPersonalizado": {
+				"type": "String"
+			},
+			"FechaSumaPeriodo": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Clase Asincrona"
+		},
+		"annotations": []
+	}
+}
