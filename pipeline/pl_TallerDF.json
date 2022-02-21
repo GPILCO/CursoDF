@@ -54,7 +54,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@equals(item().tipoTabla,'stock')",
+									"value": "@equals(item().TipoTabla,'stock')",
 									"type": "Expression"
 								},
 								"ifFalseActivities": [
