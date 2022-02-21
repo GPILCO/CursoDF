@@ -11,7 +11,7 @@
 				"typeProperties": {
 					"variableName": "Resultado",
 					"value": {
-						"value": "@String(mod(pipeline().parameters.Numero,2))",
+						"value": "@if(equals(mod(pipeline().parameters.Numero,2),0),'Es Par','Es Impar')",
 						"type": "Expression"
 					}
 				}
