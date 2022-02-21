@@ -18,12 +18,59 @@
 			{
 				"name": "Set FechaFormatoPersonalizado",
 				"type": "SetVariable",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set FechaActual",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"variableName": "FechaFormatoPersonalizado",
 					"value": {
 						"value": "@formatDateTime(variables('FechaActual'),'yyyy-mm-dd')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set FechaInicioMes",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set FechaFormatoPersonalizado",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FechaInicioMes",
+					"value": {
+						"value": "@startOfMonth(variables('FechaActual'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set FechaSumaPeriodo",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set FechaInicioMes",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "FechaSumaPeriodo",
+					"value": {
+						"value": "@addToTime(variables('FechaInicioMes'),1,'month')",
 						"type": "Expression"
 					}
 				}
