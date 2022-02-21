@@ -102,7 +102,13 @@
 										"outputs": [
 											{
 												"referenceName": "csv_Escribir",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"Directorio": {
+														"value": "@concat('Talle/',item().Esquema,'/',item().Tabla)",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									}
