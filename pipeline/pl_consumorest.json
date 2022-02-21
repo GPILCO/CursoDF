@@ -18,8 +18,33 @@
 					"url": "http://worldclockapi.com/api/json/utc/now",
 					"method": "GET"
 				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Consultar Hora Universal",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "DayOfWeek",
+					"value": {
+						"value": "@activity('Consultar Hora Universal').output.dayOfTheWeek",
+						"type": "Expression"
+					}
+				}
 			}
 		],
+		"variables": {
+			"DayOfWeek": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "Clase Asincrona"
 		},
