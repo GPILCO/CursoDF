@@ -1,6 +1,32 @@
 {
 	"name": "pl_UsoFormulas",
 	"properties": {
+		"activities": [
+			{
+				"name": "ParImpar",
+				"description": "Par O Impar",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Resultado",
+					"value": {
+						"value": "@String(mod(pipeline().parameters.Numero,2))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Numero": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"Resultado": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "Clase Asincrona"
 		},
