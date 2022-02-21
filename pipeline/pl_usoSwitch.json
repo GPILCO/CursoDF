@@ -1,0 +1,83 @@
+{
+	"name": "pl_usoSwitch",
+	"properties": {
+		"activities": [
+			{
+				"name": "Switch1",
+				"type": "Switch",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"on": {
+						"value": "@pipeline().parameters.Bandera",
+						"type": "Expression"
+					},
+					"cases": [
+						{
+							"value": "A",
+							"activities": [
+								{
+									"name": "Set variable1",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Mensaje",
+										"value": {
+											"value": "@string(add(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"value": "B",
+							"activities": [
+								{
+									"name": "Set variable2",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": []
+								}
+							]
+						},
+						{
+							"value": "C",
+							"activities": [
+								{
+									"name": "Set variable3",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": []
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Bandera": {
+				"type": "string"
+			},
+			"Numero1": {
+				"type": "float",
+				"defaultValue": 20
+			},
+			"Numero2": {
+				"type": "float",
+				"defaultValue": 10
+			}
+		},
+		"variables": {
+			"Mensaje": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Clase Asincrona"
+		},
+		"annotations": []
+	}
+}
