@@ -38,7 +38,14 @@
 									"name": "Set variable2",
 									"type": "SetVariable",
 									"dependsOn": [],
-									"userProperties": []
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Mensaje",
+										"value": {
+											"value": "@string(div(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						},
@@ -49,9 +56,28 @@
 									"name": "Set variable3",
 									"type": "SetVariable",
 									"dependsOn": [],
-									"userProperties": []
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "Mensaje",
+										"value": {
+											"value": "@string(mul(pipeline().parameters.Numero1,pipeline().parameters.Numero2))",
+											"type": "Expression"
+										}
+									}
 								}
 							]
+						}
+					],
+					"defaultActivities": [
+						{
+							"name": "Set variable4",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Mensaje",
+								"value": "Default"
+							}
 						}
 					]
 				}
