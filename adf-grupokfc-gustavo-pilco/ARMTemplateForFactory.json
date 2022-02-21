@@ -1837,17 +1837,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/IR-ConLocal')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Acceder a los recursos de la maquina local",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/sc_Taller')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1885,6 +1874,17 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/pl_TallerDF')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IR-ConLocal')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Acceder a los recursos de la maquina local",
+				"typeProperties": {}
+			},
+			"dependsOn": []
 		}
 	]
 }
