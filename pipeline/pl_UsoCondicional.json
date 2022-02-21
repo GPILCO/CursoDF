@@ -1,0 +1,64 @@
+{
+	"name": "pl_UsoCondicional",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(mod(pipeline().parameters.Numero,2),0)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Resultado",
+								"value": {
+									"value": "El Numero @{pipeline().parameters.Numero} es impar",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Resultado",
+								"value": {
+									"value": "El Numero @{pipeline().parameters.Numero} es par",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Numero": {
+				"type": "int",
+				"defaultValue": 0
+			}
+		},
+		"variables": {
+			"Resultado": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Clase Asincrona"
+		},
+		"annotations": []
+	}
+}

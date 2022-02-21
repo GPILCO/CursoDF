@@ -10,7 +10,7 @@
 				"typeProperties": {
 					"variableName": "FechaCortevar",
 					"value": {
-						"value": "@coalesce(pipeline().parameters.FechaCorte,formatDateTime(utcnow(),'yyyy-mm-dd'))",
+						"value": "@coalesce(pipeline().parameters.FechaCorte,formatDateTime(utcnow(),'yyyy-MM-dd'))",
 						"type": "Expression"
 					}
 				}
