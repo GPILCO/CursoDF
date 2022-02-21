@@ -109,7 +109,7 @@
 														"type": "Expression"
 													},
 													"NombreArchivo": {
-														"value": "@concat(item().NombreTabla,'csv')",
+														"value": "@concat(item().Tabla,pipeline().parameters.FechaCorte,'.csv')",
 														"type": "Expression"
 													}
 												}
@@ -177,7 +177,7 @@
 														"type": "Expression"
 													},
 													"NombreArchivo": {
-														"value": "@concat(item().NombreTabla,'csv')",
+														"value": "@concat(item().Tabla,'csv')",
 														"type": "Expression"
 													}
 												}
