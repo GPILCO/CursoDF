@@ -134,7 +134,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "@activity('ConsultaDatos').output.Consulta",
+													"value": "@item().Consulta",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
