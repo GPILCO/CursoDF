@@ -105,7 +105,11 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"Directorio": {
-														"value": "@concat('Talle/',item().Esquema,'/',item().Tabla)",
+														"value": "@concat('Taller/',item().Esquema,'/',item().Tabla)",
+														"type": "Expression"
+													},
+													"NombreArchivo": {
+														"value": "@concat(item().NombreTabla,'csv')",
 														"type": "Expression"
 													}
 												}
@@ -166,7 +170,17 @@
 										"outputs": [
 											{
 												"referenceName": "csv_Escribir",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"Directorio": {
+														"value": "@concat('Taller/',item().Esquema,'/',item().Tabla)",
+														"type": "Expression"
+													},
+													"NombreArchivo": {
+														"value": "@concat(item().NombreTabla,'csv')",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									}
