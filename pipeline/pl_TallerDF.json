@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('ConsultaDatos').output.value",
+						"value": "@array(activity('ConsultaDatos').output.value)",
 						"type": "Expression"
 					},
 					"isSequential": true,
